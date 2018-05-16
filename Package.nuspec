@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>JustConnect</id>
+    <version>1.0.0</version>
+    <authors>chrispypb</authors>
+    <owners>chrispypb</owners>
+    <projectUrl>https://github.com/cpaderbarosch-tgm/JustConnect</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>JustConnect is a C# Class-Library, which provides Easy-To-Use Socket-Features.</description>
+    <releaseNotes>This is the initial release. It contains a basic TCP Server and Client.</releaseNotes>
+    <copyright>Copyright Christoph Pader-Barosch 2018</copyright>
+    <tags>csharp sockets networking tcp</tags>
+  </metadata>
+
+  <files>
+    <file src="JustConnect/bin/Release/JustConnect.dll" />
+  </files>
+</package>
