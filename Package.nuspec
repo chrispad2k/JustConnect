@@ -14,6 +14,6 @@
   </metadata>
 
   <files>
-    <file src="JustConnect/bin/Release/JustConnect.dll" />
+    <file src="JustConnect/bin/Release/JustConnect.dll" target="lib\netstandard\JustConnect.dll" />
   </files>
 </package>
