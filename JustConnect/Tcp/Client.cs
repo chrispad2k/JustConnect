@@ -53,7 +53,7 @@ namespace JustConnect.Tcp
 
             Log?.Invoke("Client disconnected");
         }
-        public void Receive(IAsyncResult AR)
+        private void Receive(IAsyncResult AR)
         {
             Socket serverSocket = (Socket)AR.AsyncState;
             int received;
