@@ -74,17 +74,17 @@ namespace JustConnect.Tcp
                 clients.Add(clientSocket);
 
                 Log?.Invoke(((IPEndPoint)clientSocket.RemoteEndPoint).Address + " connected");
+
+                Accepted?.Invoke(clientSocket);
+
+                socket.BeginAccept(Accept, null);
+
+                clientSocket.BeginReceive(buffer, 0, BUFFER_SIZE, SocketFlags.None, Receive, clientSocket);
             }
-            catch (ObjectDisposedException)
+            catch (ObjectDisposedException e)
             {
                 return;
             }
-
-            Accepted?.Invoke(clientSocket);
-
-            socket.BeginAccept(Accept, null);
-
-            clientSocket.BeginReceive(buffer, 0, BUFFER_SIZE, SocketFlags.None, Receive, clientSocket);
         }
         private void Receive(IAsyncResult AR)
         {
@@ -94,30 +94,23 @@ namespace JustConnect.Tcp
             try
             {
                 received = clientSocket.EndReceive(AR);
+
+                byte[] recBuf = new byte[received];
+                Array.Copy(buffer, recBuf, received);
+                string data = Encoding.ASCII.GetString(recBuf);
+
+                Received?.Invoke(data, clientSocket);
+
+                clientSocket.BeginReceive(buffer, 0, BUFFER_SIZE, SocketFlags.None, Receive, clientSocket);
             }
             catch (SocketException)
             {
-                // Don't shutdown because the socket may be disposed and its disconnected anyway.
-                foreach (Socket client in clients)
-                {
-                    if (client == clientSocket)
-                    {
-                        Log?.Invoke(((IPEndPoint)client.RemoteEndPoint).Address + " disconnected");
-                        clients.Remove(client);
-                    }
-                }
+                Log?.Invoke(((IPEndPoint)clientSocket.RemoteEndPoint).Address + " disconnected");
+                clients.Remove(clientSocket);
                 clientSocket.Close();
 
                 return;
             }
-
-            byte[] recBuf = new byte[received];
-            Array.Copy(buffer, recBuf, received);
-            string data = Encoding.ASCII.GetString(recBuf);
-
-            Received?.Invoke(data, clientSocket);
-
-            clientSocket.BeginReceive(buffer, 0, BUFFER_SIZE, SocketFlags.None, Receive, clientSocket);
         }
         public void Send(string data, Socket clientSocket)
         {
@@ -126,7 +119,6 @@ namespace JustConnect.Tcp
                 byte[] buffer = Encoding.ASCII.GetBytes(data);
                 clientSocket.Send(buffer, 0, buffer.Length, SocketFlags.None);
             }).Start();
-
         }
         public void SendToAll(string data)
         {

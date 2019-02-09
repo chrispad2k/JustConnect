@@ -12,8 +12,8 @@ namespace JustConnect.Tcp
     public class Client
     {
         private const int BUFFER_SIZE = 2048;
-        private static Socket socket;
-        private static byte[] buffer = new byte[BUFFER_SIZE];
+        private Socket socket;
+        private byte[] buffer = new byte[BUFFER_SIZE];
 
         public bool IsConnected { get; set; }
         public int Port { get; set; }
@@ -47,6 +47,7 @@ namespace JustConnect.Tcp
         }
         public void Disconnect()
         {
+            //socket.Disconnect(false);
             socket.Close();
 
             IsConnected = false;
@@ -61,8 +62,16 @@ namespace JustConnect.Tcp
             try
             {
                 received = serverSocket.EndReceive(AR);
+
+                byte[] recBuf = new byte[received];
+                Array.Copy(buffer, recBuf, received);
+                string data = Encoding.ASCII.GetString(recBuf);
+
+                Received?.Invoke(data);
+
+                socket.BeginReceive(buffer, 0, BUFFER_SIZE, SocketFlags.None, Receive, socket);
             }
-            catch (SocketException)
+            catch (Exception)
             {
                 serverSocket.Close();
 
@@ -70,14 +79,6 @@ namespace JustConnect.Tcp
 
                 return;
             }
-
-            byte[] recBuf = new byte[received];
-            Array.Copy(buffer, recBuf, received);
-            string data = Encoding.ASCII.GetString(recBuf);
-
-            Received?.Invoke(data);
-
-            socket.BeginReceive(buffer, 0, BUFFER_SIZE, SocketFlags.None, Receive, socket);
         }
         public void Send(String data)
         {
